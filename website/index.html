@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>My Website</title>
+    <meta name="description" content="A simple, modern, responsive website." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav">
+        <a class="logo" href="#">Brand</a>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <ul class="nav-links">
+          <li><a href="#features">Features</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container">
+          <h1>Build something amazing</h1>
+          <p>A clean, responsive starter you can customize fast.</p>
+          <div class="cta-group">
+            <a class="button primary" href="#get-started">Get Started</a>
+            <a class="button" href="#learn-more">Learn More</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="features" class="features">
+        <div class="container grid">
+          <article class="card">
+            <img src="assets/placeholder.svg" alt="Fast" />
+            <h3>Fast</h3>
+            <p>Lightweight, minimal dependencies, and optimized for performance.</p>
+          </article>
+          <article class="card">
+            <img src="assets/placeholder.svg" alt="Responsive" />
+            <h3>Responsive</h3>
+            <p>Looks great on phones, tablets, and desktops with a flexible grid.</p>
+          </article>
+          <article class="card">
+            <img src="assets/placeholder.svg" alt="Accessible" />
+            <h3>Accessible</h3>
+            <p>Semantic markup and focus styles help everyone use your site.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="about" class="about">
+        <div class="container">
+          <h2>About this starter</h2>
+          <p>This is a minimal static site scaffold including HTML, CSS, and JS with a11y-friendly patterns.</p>
+        </div>
+      </section>
+
+      <section id="contact" class="contact">
+        <div class="container">
+          <h2>Contact</h2>
+          <form id="contact-form" class="form">
+            <label>
+              Name
+              <input name="name" type="text" required />
+            </label>
+            <label>
+              Email
+              <input name="email" type="email" required />
+            </label>
+            <label>
+              Message
+              <textarea name="message" rows="4" required></textarea>
+            </label>
+            <button type="submit" class="button primary">Send</button>
+            <p id="form-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>© <span id="year"></span> Brand. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
