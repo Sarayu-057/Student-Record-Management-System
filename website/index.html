@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Student Record Management System</title>
+    <meta name="description" content="Manage student records: add, list, search, delete, import, and export." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav container">
+        <a class="logo" href="#">Student Records</a>
+        <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
+        <ul class="nav-links">
+          <li><a href="#students">Students</a></li>
+          <li><a href="#add">Add</a></li>
+          <li><a href="#search">Search</a></li>
+        </ul>
+        <div class="auth">
+          <span id="auth-status" class="muted">Logged out</span>
+          <button id="users-btn" class="button small" hidden>Manage Users</button>
+          <button id="account-btn" class="button small" hidden>Account</button>
+          <button id="login-btn" class="button small">Login</button>
+          <button id="logout-btn" class="button small" hidden>Logout</button>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container">
+          <h1>Student Record Management System</h1>
+          <p>Add, view, search, edit, delete student records. Import from or export to a .txt/.csv file.</p>
+          <div class="cta-group">
+            <label class="button requires-role-admin" for="import-file">Import .txt/.csv</label>
+            <button id="export-btn" class="button primary requires-role-admin" type="button">Export CSV</button>
+            <input id="import-file" type="file" accept=".txt,.csv" hidden />
+          </div>
+          <p class="hint">Data is stored locally. Format per line: <code>RollNo,Name,Age,Course,Contact,Address,Guardian,Semester</code>. Older 3/5-column files also supported.</p>
+        </div>
+      </section>
+
+      <section id="add" class="about">
+        <div class="container">
+          <h2>Add Student</h2>
+          <form id="add-form" class="form" autocomplete="off">
+            <div class="row">
+              <label>Roll No<input name="rollNo" type="text" required minlength="1" /></label>
+              <label>Name<input name="name" type="text" required minlength="1" /></label>
+              <label>Age<input name="age" type="number" min="1" max="150" required /></label>
+            </div>
+            <div class="row">
+              <label>Course<input name="course" type="text" required /></label>
+              <label>Contact Info<input name="contact" type="text" placeholder="email or phone" required /></label>
+              <label>Semester<input name="semester" type="number" min="1" max="12" placeholder="e.g., 1-12" /></label>
+            </div>
+            <div class="row">
+              <label>Address<input name="address" type="text" placeholder="street, city" /></label>
+              <label>Guardian<input name="guardian" type="text" placeholder="parent/guardian name" /></label>
+            </div>
+            <div class="row gap">
+              <button class="button primary requires-auth" type="submit">Add</button>
+              <span id="add-status" role="status" aria-live="polite"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="search" class="about">
+        <div class="container">
+          <h2>Search</h2>
+          <div class="row">
+            <label class="grow">Search by name, roll no, course, address, guardian<input id="search-input" type="search" placeholder="Type to filter..." /></label>
+          </div>
+        </div>
+      </section>
+
+      <section id="students" class="features">
+        <div class="container">
+          <div class="list-header">
+            <h2>Students</h2>
+            <div class="muted">Total: <span id="count">0</span></div>
+          </div>
+          <div class="table-wrap">
+            <table class="table" aria-describedby="students">
+              <thead>
+                <tr>
+                  <th scope="col">Roll No</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Age</th>
+                  <th scope="col">Course</th>
+                  <th scope="col">Contact</th>
+                  <th scope="col">Address</th>
+                  <th scope="col">Guardian</th>
+                  <th scope="col">Semester</th>
+                  <th scope="col" class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="students-tbody">
+                <!-- rows injected by script.js -->
+              </tbody>
+            </table>
+          </div>
+          <p id="table-status" role="status" aria-live="polite" class="muted"></p>
+        </div>
+      </section>
+    </main>
+
+    <div id="login-modal" class="modal" hidden>
+      <div class="modal-card">
+        <h3>Login</h3>
+        <form id="login-form" class="form">
+          <label>Username<input name="username" type="text" required /></label>
+          <label>Password<input name="password" type="password" required /></label>
+          <div class="row gap">
+            <button type="submit" class="button primary">Login</button>
+            <button type="button" id="login-cancel" class="button">Cancel</button>
+          </div>
+          <p class="muted">Demo accounts will be created on first load: admin/admin123, staff/staff123, viewer/viewer123</p>
+        </form>
+      </div>
+    </div>
+
+    <div id="account-modal" class="modal" hidden>
+      <div class="modal-card">
+        <h3>Account</h3>
+        <form id="account-form" class="form">
+          <label>Old Password<input name="oldPassword" type="password" required /></label>
+          <label>New Password<input name="newPassword" type="password" required minlength="6" /></label>
+          <label>Confirm New Password<input name="confirmPassword" type="password" required minlength="6" /></label>
+          <div class="row gap">
+            <button type="submit" class="button primary">Change Password</button>
+            <button type="button" id="account-cancel" class="button">Close</button>
+          </div>
+          <p id="account-status" class="muted"></p>
+        </form>
+      </div>
+    </div>
+
+    <div id="users-modal" class="modal" hidden>
+      <div class="modal-card">
+        <h3>Manage Users</h3>
+        <form id="add-user-form" class="form">
+          <div class="row">
+            <label>Username<input name="username" type="text" required /></label>
+            <label>Password<input name="password" type="password" required minlength="6" /></label>
+            <label>Role
+              <select name="role">
+                <option value="viewer">viewer</option>
+                <option value="staff">staff</option>
+                <option value="admin">admin</option>
+              </select>
+            </label>
+          </div>
+          <div class="row gap">
+            <button type="submit" class="button primary">Add User</button>
+            <button type="button" id="users-close" class="button">Close</button>
+          </div>
+        </form>
+        <div class="table-wrap" style="margin-top:12px;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th class="actions-col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>© <span id="year"></span> Student Records. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
