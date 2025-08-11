@@ -33,7 +33,7 @@
             <button id="export-btn" class="button primary" type="button">Export CSV</button>
             <input id="import-file" type="file" accept=".txt,.csv" hidden />
           </div>
-          <p class="hint">Data is stored in your browser locally (no server). Format per line: <code>ID,Name,Age</code>.</p>
+          <p class="hint">Data is stored locally. Format per line: <code>RollNo,Name,Age,Course,Contact</code>. Older 3-column files also supported.</p>
         </div>
       </section>
 
@@ -42,9 +42,13 @@
           <h2>Add Student</h2>
           <form id="add-form" class="form" autocomplete="off">
             <div class="row">
-              <label>Student ID<input name="id" type="text" required minlength="1" /></label>
+              <label>Roll No<input name="rollNo" type="text" required minlength="1" /></label>
               <label>Name<input name="name" type="text" required minlength="1" /></label>
               <label>Age<input name="age" type="number" min="1" max="150" required /></label>
+            </div>
+            <div class="row">
+              <label>Course<input name="course" type="text" required /></label>
+              <label>Contact Info<input name="contact" type="text" placeholder="email or phone" required /></label>
             </div>
             <div class="row gap">
               <button class="button primary" type="submit">Add</button>
@@ -58,7 +62,7 @@
         <div class="container">
           <h2>Search</h2>
           <div class="row">
-            <label class="grow">Search by name<input id="search-input" type="search" placeholder="Type a name..." /></label>
+            <label class="grow">Search by name or roll no<input id="search-input" type="search" placeholder="Type a name or roll no..." /></label>
           </div>
         </div>
       </section>
@@ -73,9 +77,11 @@
             <table class="table" aria-describedby="students">
               <thead>
                 <tr>
-                  <th scope="col">ID</th>
+                  <th scope="col">Roll No</th>
                   <th scope="col">Name</th>
                   <th scope="col">Age</th>
+                  <th scope="col">Course</th>
+                  <th scope="col">Contact</th>
                   <th scope="col" class="actions-col">Actions</th>
                 </tr>
               </thead>
