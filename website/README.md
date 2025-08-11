@@ -1,19 +1,24 @@
 # Student Record Management System (Web)
 
-A simple client-side app to manage student records. Inspired by the Java console app in `StudentManagement.java` and `students.txt`.
+A client-side SRMS with roles, inline editing, import/export, and local persistence.
 
 ## Features
 
-- Add student with fields: `Roll No`, `Name`, `Age`, `Course`, `Contact`
-- Inline edit existing records (all fields)
-- Delete student record
-- Search by name, roll number, or course
-- Import from `.txt`/`.csv` (lines like `RollNo,Name,Age,Course,Contact`; falls back to `ID,Name,Age`)
-- Export to CSV (`students.csv`)
-- Login: demo users
-  - admin/admin123 (can import/export)
+- Fields per student: Roll No, Name, Age, Course, Contact, Address, Guardian, Semester
+- Inline edit, delete, search (by name/roll/course/address/guardian)
+- Import from .txt/.csv with flexible formats:
+  - v3: RollNo,Name,Age,Course,Contact,Address,Guardian,Semester
+  - v2: RollNo,Name,Age,Course,Contact
+  - v1: ID,Name,Age
+- Export to CSV (v3 header)
+- Roles: viewer (view only), staff (add/edit/delete), admin (all + import/export + manage users)
+- Login with demo users (seeded on first run):
+  - admin/admin123
   - staff/staff123
-- Data persists in browser `localStorage`
+  - viewer/viewer123
+- Account: change your password
+- Manage Users (admin): add users, change roles, reset passwords
+- Data persists in localStorage
 
 ## Run locally
 
@@ -22,20 +27,7 @@ python3 -m http.server 8000 --directory /workspace/website
 # open http://localhost:8000
 ```
 
-## File format
-
-- Preferred: `RollNo,Name,Age,Course,Contact`
-- Backward compatible: `ID,Name,Age`
-- Example:
-
-```
-R1001,Alex Johnson,20,BSc CS,alex@example.com
-R1002,Jamie Lee,22,BCom,555-123-9876
-```
-
-On import, duplicate roll numbers overwrite previous entries.
-
 ## Notes
 
-- Mutations (add/edit/delete) require login. Import/Export require admin role.
-- To reset data, clear site data in the browser (localStorage) via DevTools.
+- Security: credentials are stored locally in plaintext for demo purposes only.
+- To reset app state, clear localStorage for the site from DevTools.
