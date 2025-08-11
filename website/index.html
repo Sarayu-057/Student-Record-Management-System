@@ -3,8 +3,8 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>My Website</title>
-    <meta name="description" content="A simple, modern, responsive website." />
+    <title>Student Record Management System</title>
+    <meta name="description" content="Manage student records: add, list, search, delete, import, and export." />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
@@ -12,13 +12,13 @@
   </head>
   <body>
     <header class="site-header">
-      <nav class="nav">
-        <a class="logo" href="#">Brand</a>
+      <nav class="nav container">
+        <a class="logo" href="#">Student Records</a>
         <button class="nav-toggle" aria-label="Toggle navigation" aria-expanded="false">☰</button>
         <ul class="nav-links">
-          <li><a href="#features">Features</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
+          <li><a href="#students">Students</a></li>
+          <li><a href="#add">Add</a></li>
+          <li><a href="#search">Search</a></li>
         </ul>
       </nav>
     </header>
@@ -26,68 +26,72 @@
     <main>
       <section class="hero">
         <div class="container">
-          <h1>Build something amazing</h1>
-          <p>A clean, responsive starter you can customize fast.</p>
+          <h1>Student Record Management System</h1>
+          <p>Add, view, search, delete student records. Import from or export to a .txt/.csv file.</p>
           <div class="cta-group">
-            <a class="button primary" href="#get-started">Get Started</a>
-            <a class="button" href="#learn-more">Learn More</a>
+            <label class="button" for="import-file">Import .txt/.csv</label>
+            <button id="export-btn" class="button primary" type="button">Export CSV</button>
+            <input id="import-file" type="file" accept=".txt,.csv" hidden />
+          </div>
+          <p class="hint">Data is stored in your browser locally (no server). Format per line: <code>ID,Name,Age</code>.</p>
+        </div>
+      </section>
+
+      <section id="add" class="about">
+        <div class="container">
+          <h2>Add Student</h2>
+          <form id="add-form" class="form" autocomplete="off">
+            <div class="row">
+              <label>Student ID<input name="id" type="text" required minlength="1" /></label>
+              <label>Name<input name="name" type="text" required minlength="1" /></label>
+              <label>Age<input name="age" type="number" min="1" max="150" required /></label>
+            </div>
+            <div class="row gap">
+              <button class="button primary" type="submit">Add</button>
+              <span id="add-status" role="status" aria-live="polite"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="search" class="about">
+        <div class="container">
+          <h2>Search</h2>
+          <div class="row">
+            <label class="grow">Search by name<input id="search-input" type="search" placeholder="Type a name..." /></label>
           </div>
         </div>
       </section>
 
-      <section id="features" class="features">
-        <div class="container grid">
-          <article class="card">
-            <img src="assets/placeholder.svg" alt="Fast" />
-            <h3>Fast</h3>
-            <p>Lightweight, minimal dependencies, and optimized for performance.</p>
-          </article>
-          <article class="card">
-            <img src="assets/placeholder.svg" alt="Responsive" />
-            <h3>Responsive</h3>
-            <p>Looks great on phones, tablets, and desktops with a flexible grid.</p>
-          </article>
-          <article class="card">
-            <img src="assets/placeholder.svg" alt="Accessible" />
-            <h3>Accessible</h3>
-            <p>Semantic markup and focus styles help everyone use your site.</p>
-          </article>
-        </div>
-      </section>
-
-      <section id="about" class="about">
+      <section id="students" class="features">
         <div class="container">
-          <h2>About this starter</h2>
-          <p>This is a minimal static site scaffold including HTML, CSS, and JS with a11y-friendly patterns.</p>
-        </div>
-      </section>
-
-      <section id="contact" class="contact">
-        <div class="container">
-          <h2>Contact</h2>
-          <form id="contact-form" class="form">
-            <label>
-              Name
-              <input name="name" type="text" required />
-            </label>
-            <label>
-              Email
-              <input name="email" type="email" required />
-            </label>
-            <label>
-              Message
-              <textarea name="message" rows="4" required></textarea>
-            </label>
-            <button type="submit" class="button primary">Send</button>
-            <p id="form-status" role="status" aria-live="polite"></p>
-          </form>
+          <div class="list-header">
+            <h2>Students</h2>
+            <div class="muted">Total: <span id="count">0</span></div>
+          </div>
+          <div class="table-wrap">
+            <table class="table" aria-describedby="students">
+              <thead>
+                <tr>
+                  <th scope="col">ID</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Age</th>
+                  <th scope="col" class="actions-col">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="students-tbody">
+                <!-- rows injected by script.js -->
+              </tbody>
+            </table>
+          </div>
+          <p id="table-status" role="status" aria-live="polite" class="muted"></p>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
       <div class="container">
-        <p>© <span id="year"></span> Brand. All rights reserved.</p>
+        <p>© <span id="year"></span> Student Records. All rights reserved.</p>
       </div>
     </footer>
 

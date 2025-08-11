@@ -1,28 +1,36 @@
-# Website Starter
+# Student Record Management System (Web)
 
-A simple, modern, responsive static website scaffold.
+A simple client-side app to manage student records. Inspired by the Java console app in `StudentManagement.java` and `students.txt`.
 
-## Develop
+## Features
 
-- Open `index.html` directly in a browser, or run a simple server:
+- Add student with `ID`, `Name`, `Age`
+- List and delete students
+- Search by name (case-insensitive substring)
+- Import from `.txt`/`.csv` (lines like `ID,Name,Age`)
+- Export to CSV (`students.csv`)
+- Data persists in browser `localStorage`
+
+## Run locally
 
 ```bash
-# Python 3
 python3 -m http.server 8000 --directory /workspace/website
-
-# Or using Node (if installed)
-npx serve /workspace/website -l 8000 --yes
+# open http://localhost:8000
 ```
 
-Then visit `http://localhost:8000`.
+## File format
 
-## Customize
+- One record per line: `ID,Name,Age`
+- Example:
 
-- Update branding in `index.html` (`<title>`, `.logo`, hero text)
-- Replace icons in `assets/`
-- Adjust colors and spacing in `styles.css`
-- Add sections or pages and link them in the nav
+```
+S101,Alex,20
+S102,Jamie,22
+```
 
-## Deploy
+On import, duplicate IDs overwrite previous entries.
 
-Host the static files on any static host (GitHub Pages, Netlify, Vercel, S3, etc.). Upload the contents of `/workspace/website`.
+## Notes
+
+- This is a static front-end only. No backend is required.
+- To reset data, clear site data in the browser (localStorage) via DevTools.
