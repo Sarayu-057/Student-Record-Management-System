@@ -1,6 +1,7 @@
 // Mobile nav toggle
 document.addEventListener('DOMContentLoaded', () => {
-  const STORAGE_KEY = 'students';
+  const STORAGE_KEY = 'students_v2';
+  const AUTH_KEY = 'auth_user';
 
   const toggleButton = document.querySelector('.nav-toggle');
   const navLinks = document.querySelector('.nav-links');
@@ -13,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Elements
   const addForm = document.getElementById('add-form');
   const addStatus = document.getElementById('add-status');
   const tableBody = document.getElementById('students-tbody');
@@ -22,120 +24,274 @@ document.addEventListener('DOMContentLoaded', () => {
   const importInput = document.getElementById('import-file');
   const exportBtn = document.getElementById('export-btn');
 
+  const loginBtn = document.getElementById('login-btn');
+  const logoutBtn = document.getElementById('logout-btn');
+  const authStatus = document.getElementById('auth-status');
+  const loginModal = document.getElementById('login-modal');
+  const loginForm = document.getElementById('login-form');
+  const loginCancel = document.getElementById('login-cancel');
+
+  // Auth
+  function getUser() {
+    try { return JSON.parse(localStorage.getItem(AUTH_KEY)) || null; } catch { return null; }
+  }
+  function setUser(user) { localStorage.setItem(AUTH_KEY, JSON.stringify(user)); }
+  function clearUser() { localStorage.removeItem(AUTH_KEY); }
+  function isLoggedIn() { return Boolean(getUser()); }
+  function hasAdminRole() { return getUser()?.role === 'admin'; }
+
+  function applyAuthUI() {
+    const user = getUser();
+    authStatus.textContent = user ? `${user.role.toUpperCase()}: ${user.username}` : 'Logged out';
+    loginBtn.hidden = Boolean(user);
+    logoutBtn.hidden = !Boolean(user);
+
+    const requiresAuth = document.querySelectorAll('.requires-auth');
+    requiresAuth.forEach(el => el.disabled = !user);
+
+    const adminOnly = document.querySelectorAll('.requires-role-admin');
+    adminOnly.forEach(el => el.style.display = hasAdminRole() ? '' : 'none');
+  }
+
+  function showLogin() { loginModal.hidden = false; }
+  function hideLogin() { loginModal.hidden = true; loginForm.reset(); }
+
+  if (loginBtn) loginBtn.addEventListener('click', showLogin);
+  if (loginCancel) loginCancel.addEventListener('click', hideLogin);
+  if (logoutBtn) logoutBtn.addEventListener('click', () => { clearUser(); applyAuthUI(); });
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const data = new FormData(loginForm);
+      const username = String(data.get('username'));
+      const password = String(data.get('password'));
+      // Demo credentials
+      if (username === 'admin' && password === 'admin123') {
+        setUser({ username, role: 'admin' });
+        hideLogin();
+        applyAuthUI();
+      } else if (username === 'staff' && password === 'staff123') {
+        setUser({ username, role: 'staff' });
+        hideLogin();
+        applyAuthUI();
+      } else {
+        alert('Invalid credentials. Try admin/admin123 or staff/staff123');
+      }
+    });
+  }
+
+  // Data
+  function migrateV1toV2(records) {
+    // v1: { id, name, age } -> v2: { rollNo, name, age, course, contact }
+    return records.map(r => ({
+      rollNo: r.id ?? r.rollNo,
+      name: r.name ?? '',
+      age: r.age ?? '',
+      course: r.course ?? '',
+      contact: r.contact ?? ''
+    })).filter(r => r.rollNo);
+  }
+
   function loadStudents() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch (e) {
-      console.warn('Failed to parse storage', e);
-      return [];
+    const v2 = localStorage.getItem(STORAGE_KEY);
+    if (v2) {
+      try { return JSON.parse(v2) || []; } catch { return []; }
     }
+    // fallback migrate from v1 key 'students'
+    const v1 = localStorage.getItem('students');
+    if (v1) {
+      try {
+        const migrated = migrateV1toV2(JSON.parse(v1));
+        saveStudents(migrated);
+        return migrated;
+      } catch { return []; }
+    }
+    return [];
   }
 
   function saveStudents(students) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
   }
 
-  function toNormalizedName(name) {
-    return String(name || '').trim();
-  }
+  function normalize(text) { return String(text || '').trim(); }
 
   function addStudent(record) {
+    if (!isLoggedIn()) throw new Error('Login required.');
     const students = loadStudents();
-    const id = String(record.id).trim();
-    const name = toNormalizedName(record.name);
+    const rollNo = normalize(record.rollNo);
+    const name = normalize(record.name);
     const age = Number.parseInt(record.age, 10);
-
-    if (!id || !name || Number.isNaN(age) || age < 1) {
+    const course = normalize(record.course);
+    const contact = normalize(record.contact);
+    if (!rollNo || !name || Number.isNaN(age) || age < 1 || !course || !contact) {
       throw new Error('Invalid input.');
     }
-    const exists = students.some(s => String(s.id) === id);
-    if (exists) {
-      throw new Error('A student with this ID already exists.');
-    }
-    students.push({ id, name, age });
-    students.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const exists = students.some(s => String(s.rollNo) === rollNo);
+    if (exists) throw new Error('Roll No already exists.');
+
+    students.push({ rollNo, name, age, course, contact });
+    students.sort((a, b) => String(a.rollNo).localeCompare(String(b.rollNo)));
     saveStudents(students);
     return students;
   }
 
-  function deleteStudentById(targetId) {
+  function updateStudent(rollNo, updates) {
+    if (!isLoggedIn()) throw new Error('Login required.');
     const students = loadStudents();
-    const next = students.filter(s => String(s.id) !== String(targetId));
+    const idx = students.findIndex(s => String(s.rollNo) === String(rollNo));
+    if (idx === -1) return students;
+    const current = students[idx];
+    const next = { ...current, ...updates };
+    if (!next.rollNo) next.rollNo = current.rollNo; // prevent empty key
+    if (String(next.rollNo) !== String(current.rollNo)) {
+      // ensure new roll unique
+      if (students.some((s, i) => i !== idx && String(s.rollNo) === String(next.rollNo))) {
+        throw new Error('Roll No must be unique.');
+      }
+    }
+    // basic validation
+    next.name = normalize(next.name);
+    next.course = normalize(next.course);
+    next.contact = normalize(next.contact);
+    next.age = Number.parseInt(next.age, 10);
+    if (!next.name || !next.course || !next.contact || Number.isNaN(next.age) || next.age < 1) {
+      throw new Error('Invalid values.');
+    }
+
+    students[idx] = next;
+    students.sort((a, b) => String(a.rollNo).localeCompare(String(b.rollNo)));
+    saveStudents(students);
+    return students;
+  }
+
+  function deleteStudentByRoll(rollNo) {
+    if (!isLoggedIn()) throw new Error('Login required.');
+    const students = loadStudents();
+    const next = students.filter(s => String(s.rollNo) !== String(rollNo));
     saveStudents(next);
     return next;
   }
 
-  function searchByName(query) {
+  function searchRecords(query) {
     const students = loadStudents();
-    const q = String(query || '').toLowerCase();
+    const q = normalize(query).toLowerCase();
     if (!q) return students;
-    return students.filter(s => String(s.name).toLowerCase().includes(q));
+    return students.filter(s =>
+      String(s.name).toLowerCase().includes(q) ||
+      String(s.rollNo).toLowerCase().includes(q) ||
+      String(s.course).toLowerCase().includes(q)
+    );
   }
 
   function importFromText(text) {
-    const students = loadStudents();
-    const indexById = new Map(students.map(s => [String(s.id), s]));
+    if (!hasAdminRole()) throw new Error('Admin only.');
+    const current = loadStudents();
+    const byRoll = new Map(current.map(s => [String(s.rollNo), s]));
     const lines = String(text).split(/\r?\n/);
     let imported = 0;
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed) continue;
       const parts = trimmed.split(',');
-      if (parts.length < 3) continue;
-      const [idRaw, nameRaw, ageRaw] = parts;
-      const id = String(idRaw).trim();
-      const name = toNormalizedName(nameRaw);
-      const age = Number.parseInt(ageRaw, 10);
-      if (!id || !name || Number.isNaN(age) || age < 1) continue;
-      indexById.set(id, { id, name, age });
-      imported += 1;
+      if (parts.length >= 5) {
+        const [rollNoRaw, nameRaw, ageRaw, courseRaw, contactRaw] = parts;
+        const rollNo = normalize(rollNoRaw);
+        const name = normalize(nameRaw);
+        const age = Number.parseInt(ageRaw, 10);
+        const course = normalize(courseRaw);
+        const contact = normalize(contactRaw);
+        if (!rollNo || !name || Number.isNaN(age) || age < 1 || !course || !contact) continue;
+        byRoll.set(rollNo, { rollNo, name, age, course, contact });
+        imported += 1;
+      } else if (parts.length >= 3) {
+        // backward compat (id,name,age)
+        const [idRaw, nameRaw, ageRaw] = parts;
+        const rollNo = normalize(idRaw);
+        const name = normalize(nameRaw);
+        const age = Number.parseInt(ageRaw, 10);
+        if (!rollNo || !name || Number.isNaN(age) || age < 1) continue;
+        const prev = byRoll.get(rollNo) || { rollNo, name, age, course: '', contact: '' };
+        byRoll.set(rollNo, { ...prev, rollNo, name, age });
+        imported += 1;
+      }
     }
-    const merged = Array.from(indexById.values()).sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    const merged = Array.from(byRoll.values()).sort((a, b) => String(a.rollNo).localeCompare(String(b.rollNo)));
     saveStudents(merged);
     return { merged, imported };
   }
 
   function exportToCsv() {
     const students = loadStudents();
-    const header = 'id,name,age';
-    const lines = students.map(s => `${s.id},${s.name},${s.age}`);
+    const header = 'rollNo,name,age,course,contact';
+    const lines = students.map(s => `${s.rollNo},${s.name},${s.age},${s.course},${s.contact}`);
     return [header, ...lines].join('\n');
+  }
+
+  // Rendering
+  function createCell(text) {
+    const td = document.createElement('td');
+    td.textContent = text;
+    return td;
+  }
+
+  function createEditableCell(value, key, rollNo) {
+    const td = document.createElement('td');
+    const input = document.createElement('input');
+    input.className = 'cell-input';
+    input.value = String(value ?? '');
+    input.addEventListener('change', () => {
+      try {
+        const updates = { [key]: input.value };
+        const next = updateStudent(rollNo, updates);
+        updateView(next);
+        tableStatus.textContent = 'Saved.';
+      } catch (e) {
+        alert(e.message || 'Failed to save');
+        updateView();
+      }
+    });
+    // Allow only numbers for age
+    if (key === 'age') input.type = 'number';
+    td.appendChild(input);
+    return td;
   }
 
   function renderTable(list) {
     tableBody.innerHTML = '';
     const fragment = document.createDocumentFragment();
 
+    const user = getUser();
+
     for (const s of list) {
       const tr = document.createElement('tr');
 
-      const idTd = document.createElement('td');
-      idTd.textContent = s.id;
-      tr.appendChild(idTd);
-
-      const nameTd = document.createElement('td');
-      nameTd.textContent = s.name;
-      tr.appendChild(nameTd);
-
-      const ageTd = document.createElement('td');
-      ageTd.textContent = String(s.age);
-      tr.appendChild(ageTd);
+      tr.appendChild(createEditableCell(s.rollNo, 'rollNo', s.rollNo));
+      tr.appendChild(createEditableCell(s.name, 'name', s.rollNo));
+      tr.appendChild(createEditableCell(s.age, 'age', s.rollNo));
+      tr.appendChild(createEditableCell(s.course, 'course', s.rollNo));
+      tr.appendChild(createEditableCell(s.contact, 'contact', s.rollNo));
 
       const actionsTd = document.createElement('td');
+      actionsTd.className = 'actions-col';
+
       const delBtn = document.createElement('button');
       delBtn.className = 'button small danger';
       delBtn.type = 'button';
       delBtn.textContent = 'Delete';
+      delBtn.disabled = !user; // require login
       delBtn.addEventListener('click', () => {
-        const next = deleteStudentById(s.id);
-        updateView(next);
-        tableStatus.textContent = `Deleted student ${s.id}.`;
+        try {
+          const next = deleteStudentByRoll(s.rollNo);
+          updateView(next);
+          tableStatus.textContent = `Deleted ${s.rollNo}.`;
+        } catch (e) {
+          alert(e.message || 'Failed to delete');
+        }
       });
       actionsTd.appendChild(delBtn);
-      actionsTd.className = 'actions-col';
-      tr.appendChild(actionsTd);
 
+      tr.appendChild(actionsTd);
       fragment.appendChild(tr);
     }
 
@@ -144,7 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function updateView(currentList) {
-    const list = currentList ?? searchByName(searchInput?.value || '');
+    const list = currentList ?? searchRecords(searchInput?.value || '');
     renderTable(list);
   }
 
@@ -155,9 +311,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData(addForm);
       try {
         const next = addStudent({
-          id: formData.get('id'),
+          rollNo: formData.get('rollNo'),
           name: formData.get('name'),
-          age: formData.get('age')
+          age: formData.get('age'),
+          course: formData.get('course'),
+          contact: formData.get('contact'),
         });
         addForm.reset();
         addStatus.textContent = 'Student added.';
@@ -183,10 +341,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!file) return;
       const reader = new FileReader();
       reader.onload = () => {
-        const text = String(reader.result || '');
-        const { merged, imported } = importFromText(text);
-        updateView(merged);
-        tableStatus.textContent = `Imported ${imported} records. Total ${merged.length}.`;
+        try {
+          const text = String(reader.result || '');
+          const { merged, imported } = importFromText(text);
+          updateView(merged);
+          tableStatus.textContent = `Imported ${imported} records. Total ${merged.length}.`;
+        } catch (e) {
+          alert(e.message || 'Import failed');
+        }
         importInput.value = '';
       };
       reader.readAsText(file);
@@ -207,6 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initial render
+  // Init
+  applyAuthUI();
   updateView();
 });

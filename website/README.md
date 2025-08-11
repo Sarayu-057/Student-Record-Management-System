@@ -4,11 +4,15 @@ A simple client-side app to manage student records. Inspired by the Java console
 
 ## Features
 
-- Add student with `ID`, `Name`, `Age`
-- List and delete students
-- Search by name (case-insensitive substring)
-- Import from `.txt`/`.csv` (lines like `ID,Name,Age`)
+- Add student with fields: `Roll No`, `Name`, `Age`, `Course`, `Contact`
+- Inline edit existing records (all fields)
+- Delete student record
+- Search by name, roll number, or course
+- Import from `.txt`/`.csv` (lines like `RollNo,Name,Age,Course,Contact`; falls back to `ID,Name,Age`)
 - Export to CSV (`students.csv`)
+- Login: demo users
+  - admin/admin123 (can import/export)
+  - staff/staff123
 - Data persists in browser `localStorage`
 
 ## Run locally
@@ -20,17 +24,18 @@ python3 -m http.server 8000 --directory /workspace/website
 
 ## File format
 
-- One record per line: `ID,Name,Age`
+- Preferred: `RollNo,Name,Age,Course,Contact`
+- Backward compatible: `ID,Name,Age`
 - Example:
 
 ```
-S101,Alex,20
-S102,Jamie,22
+R1001,Alex Johnson,20,BSc CS,alex@example.com
+R1002,Jamie Lee,22,BCom,555-123-9876
 ```
 
-On import, duplicate IDs overwrite previous entries.
+On import, duplicate roll numbers overwrite previous entries.
 
 ## Notes
 
-- This is a static front-end only. No backend is required.
+- Mutations (add/edit/delete) require login. Import/Export require admin role.
 - To reset data, clear site data in the browser (localStorage) via DevTools.

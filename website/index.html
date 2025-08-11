@@ -20,6 +20,11 @@
           <li><a href="#add">Add</a></li>
           <li><a href="#search">Search</a></li>
         </ul>
+        <div class="auth">
+          <span id="auth-status" class="muted">Logged out</span>
+          <button id="login-btn" class="button small">Login</button>
+          <button id="logout-btn" class="button small" hidden>Logout</button>
+        </div>
       </nav>
     </header>
 
@@ -29,8 +34,8 @@
           <h1>Student Record Management System</h1>
           <p>Add, view, search, delete student records. Import from or export to a .txt/.csv file.</p>
           <div class="cta-group">
-            <label class="button" for="import-file">Import .txt/.csv</label>
-            <button id="export-btn" class="button primary" type="button">Export CSV</button>
+            <label class="button requires-role-admin" for="import-file">Import .txt/.csv</label>
+            <button id="export-btn" class="button primary requires-role-admin" type="button">Export CSV</button>
             <input id="import-file" type="file" accept=".txt,.csv" hidden />
           </div>
           <p class="hint">Data is stored locally. Format per line: <code>RollNo,Name,Age,Course,Contact</code>. Older 3-column files also supported.</p>
@@ -51,7 +56,7 @@
               <label>Contact Info<input name="contact" type="text" placeholder="email or phone" required /></label>
             </div>
             <div class="row gap">
-              <button class="button primary" type="submit">Add</button>
+              <button class="button primary requires-auth" type="submit">Add</button>
               <span id="add-status" role="status" aria-live="polite"></span>
             </div>
           </form>
@@ -94,6 +99,21 @@
         </div>
       </section>
     </main>
+
+    <div id="login-modal" class="modal" hidden>
+      <div class="modal-card">
+        <h3>Login</h3>
+        <form id="login-form" class="form">
+          <label>Username<input name="username" type="text" required /></label>
+          <label>Password<input name="password" type="password" required /></label>
+          <div class="row gap">
+            <button type="submit" class="button primary">Login</button>
+            <button type="button" id="login-cancel" class="button">Cancel</button>
+          </div>
+          <p class="muted">Demo accounts: admin/admin123, staff/staff123</p>
+        </form>
+      </div>
+    </div>
 
     <footer class="site-footer">
       <div class="container">

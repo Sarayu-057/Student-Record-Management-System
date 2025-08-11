@@ -34,6 +34,7 @@ input, button, textarea, select { font: inherit; }
 .nav-links a { text-decoration: none; color: var(--muted); padding: 8px 10px; border-radius: 8px; }
 .nav-links a:hover, .nav-links a:focus-visible { background: var(--surface); color: var(--text); }
 .nav-toggle { display: none; background: transparent; border: none; font-size: 1.5rem; }
+.auth { display: flex; align-items: center; gap: 8px; }
 
 /* Hero */
 .hero { padding: 96px 0 54px; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 60%); border-bottom: 1px solid var(--border); }
@@ -79,11 +80,17 @@ input, button, textarea, select { font: inherit; }
 
 .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; box-shadow: var(--shadow); background: #fff; }
 .table { width: 100%; border-collapse: collapse; }
-.table th, .table td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+.table th, .table td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: middle; }
 .table thead th { background: var(--surface); font-weight: 600; }
 .table tbody tr:hover { background: #f8fafc; }
 .actions-col { width: 1%; white-space: nowrap; }
+.cell-input { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; }
+
 #table-status { margin-top: 10px; }
+
+/* Modal */
+.modal { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.5); display: grid; place-items: center; padding: 16px; }
+.modal-card { background: #fff; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); padding: 18px; width: min(420px, 92%); }
 
 /* Footer */
 .site-footer { border-top: 1px solid var(--border); background: #fff; }
